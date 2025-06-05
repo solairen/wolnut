@@ -1,0 +1,1 @@
+{"meta": {"ups_on_battery": false, "battery_percent_at_shutdown": 100}, "clients": {"test1": {"was_online_before_battery": false, "is_online": true, "wol_sent": false}, "test2": {"was_online_before_battery": false, "is_online": true, "wol_sent": false}}}
