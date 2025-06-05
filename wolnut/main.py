@@ -56,12 +56,17 @@ def main():
         elif ("OL" in power_status and on_battery) or restoration_event:
             on_battery = False
             restoration_event = True
+
             if not restoration_event_start:
                 restoration_event_start = time.time()
 
             if battery_percent < config.wake_on.min_battery_percent:
                 logger.info(
-                    "Power restored, but battery still below minimum percentage. Waiting...")
+                    "Power restored, but battery still below minimum percentage (%s%%/%s%%). Waiting...", battery_percent, config.wake_on.min_battery_percent)
+
+            elif time.time() - restoration_event_start < config.wake_on.restore_delay_sec:
+                logger.info(
+                    "Power restored, waiting %s seconds before waking clients...", int(config.wake_on.restore_delay_sec-(time.time() - restoration_event_start)))
 
             else:
                 logger.info("Power restored and battery >= %s%%. Preparing to send WOL...",
