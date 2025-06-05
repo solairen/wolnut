@@ -6,7 +6,7 @@ logger = logging.getLogger("wolnut")
 
 def send_wol_packet(mac_address: str, broadcast_ip: str = "255.255.255.255") -> bool:
     try:
-        logger.info("Sending WOL packet to %s", mac_address)
+        logger.debug("Sending WOL packet to %s", mac_address)
         send_magic_packet(mac_address, ip_address=broadcast_ip)
         return True
     except Exception as e:

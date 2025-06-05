@@ -2,8 +2,10 @@ import json
 import os
 from typing import Dict, Any
 import logging
+import time
 
 logger = logging.getLogger("wolnut")
+logger.setLevel(logging.INFO)
 
 
 class ClientStateTracker:
@@ -19,7 +21,9 @@ class ClientStateTracker:
             client.name: {
                 "was_online_before_battery": False,
                 "is_online": False,
-                "wol_sent": False
+                "wol_sent": False,
+                "wol_sent_at": 0,
+                "skip": False
             }
             for client in clients
         }
@@ -34,7 +38,7 @@ class ClientStateTracker:
 
             self._meta_state.update(save_data["meta"])
 
-            for name, state in save_data.items():
+            for name, state in save_data.get("clients", {}).items():
                 if name in self._client_states:
                     self._client_states[name].update(state)
 
@@ -60,6 +64,12 @@ class ClientStateTracker:
     def mark_wol_sent(self, client_name: str):
         if client_name in self._client_states:
             self._client_states[client_name]["wol_sent"] = True
+            self._client_states[client_name]["wol_sent_at"] = time.time()
+        self._save_state()
+
+    def mark_skip(self, client_name: str):
+        if client_name in self._client_states:
+            self._client_states[client_name]["skip"] = True
         self._save_state()
 
     def mark_all_online_clients(self):
@@ -76,6 +86,14 @@ class ClientStateTracker:
     def has_been_wol_sent(self, client_name: str) -> bool:
         return self._client_states.get(client_name, {}).get("wol_sent", False)
 
+    def should_attempt_wol(self, client_name: str, reattempt_delay: int) -> bool:
+        state = self._client_states.get(client_name, {})
+        last = state.get("wol_sent_at", 0)
+        return time.time() - last >= reattempt_delay
+
+    def should_skip(self, client_name: str) -> bool:
+        return self._client_states.get(client_name, {}).get("skip", False)
+
     def set_ups_on_battery(self, is_on_battery: bool, battery_percent: int = 100):
         self._meta_state["ups_on_battery"] = is_on_battery
         self._meta_state["battery_percent_at_shutdown"] = battery_percent
@@ -88,4 +106,5 @@ class ClientStateTracker:
         for state in self._client_states.values():
             state["was_online_before_battery"] = False
             state["wol_sent"] = False
+            state["skip"] = False
         self._save_state()

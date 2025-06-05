@@ -1,3 +1,6 @@
+# copy this to config.yaml befor running wolnut
+log_level: INFO  # Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
+
 nut:
   ups: "ups@localhost"        # Format: <ups-name>@<host>
   username: "upsmon"          # Optional: omit if NUT server doesn't require auth
@@ -9,6 +12,7 @@ wake_on:
   restore_delay_sec: 30       # Delay (in seconds) after power is restored before sending WOL
   min_battery_percent: 25     # Wait until battery reaches this percent before WOL
   client_timeout_sec: 600     # Time to wait for client to come back online before logging an error
+  reattempt_delay: 30         # Minimum time (in seconds) between WOL attempts per client
 
 clients:
   - name: "client 1"                  # Human-readable name

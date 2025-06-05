@@ -19,6 +19,7 @@ class WakeOnConfig:
     restore_delay_sec: int = 30
     min_battery_percent: int = 20
     client_timeout_sec: int = 360
+    reattempt_delay: int = 30
 
 
 @dataclass
@@ -34,6 +35,7 @@ class WolnutConfig:
     poll_interval: int = 10
     wake_on: WakeOnConfig = field(default_factory=WakeOnConfig)
     clients: list[ClientConfig] = field(default_factory=list)
+    log_level: str = "INFO"
 
 
 def load_config(path: str = "config.yaml") -> WolnutConfig:
@@ -74,7 +76,8 @@ def load_config(path: str = "config.yaml") -> WolnutConfig:
         nut=nut,
         poll_interval=raw.get("poll_interval", 10),
         wake_on=wake_on,
-        clients=clients
+        clients=clients,
+        log_level=raw.get("log_level", "INFO").upper()
     )
     logger.info("Config Imported Successfully")
     for client in wolnut_config.clients:
