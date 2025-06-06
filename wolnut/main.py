@@ -9,6 +9,7 @@ logger = logging.getLogger("wolnut")
 
 
 def main():
+    """MAIN LOOP"""
     config = load_config()
 
     logger.setLevel(config.log_level)
@@ -62,11 +63,15 @@ def main():
 
             if battery_percent < config.wake_on.min_battery_percent:
                 logger.info(
-                    "Power restored, but battery still below minimum percentage (%s%%/%s%%). Waiting...", battery_percent, config.wake_on.min_battery_percent)
+                    """Power restored, but battery still below 
+                    minimum percentage (%s%%/%s%%). Waiting...""",
+                    battery_percent,
+                    config.wake_on.min_battery_percent)
 
             elif time.time() - restoration_event_start < config.wake_on.restore_delay_sec:
                 logger.info(
-                    "Power restored, waiting %s seconds before waking clients...", int(config.wake_on.restore_delay_sec-(time.time() - restoration_event_start)))
+                    "Power restored, waiting %s seconds before waking clients...",
+                    int(config.wake_on.restore_delay_sec-(time.time() - restoration_event_start)))
 
             else:
                 logger.info("Power restored and battery >= %s%%. Preparing to send WOL...",
@@ -90,7 +95,10 @@ def main():
 
                     else:
                         recorded_down_clients.update({client.name})
-                        if state_tracker.should_attempt_wol(client.name, config.wake_on.reattempt_delay):
+                        if state_tracker.should_attempt_wol(
+                            client.name,
+                            config.wake_on.reattempt_delay
+                        ):
                             logger.info(
                                 "Sending WOL packet to %s at %s", client.name, client.mac)
                             if send_wol_packet(client.mac):

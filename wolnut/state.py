@@ -9,6 +9,23 @@ logger.setLevel(logging.INFO)
 
 
 class ClientStateTracker:
+    """
+    Tracks the online/offline state of client systems and Wake-on-LAN activity
+    during and after a UPS battery event.
+
+    Attributes:
+        _clients (list): List of clients being tracked.
+        _state_file (str): Path to the JSON file for persisting state.
+        _client_states (dict): Tracks per-client status info.
+        _meta_state (dict): Tracks global UPS-related status.
+
+    Methods:
+        update(client_name, online): Updates online status.
+        mark_wol_sent(client_name): Marks a client as having been sent a WOL packet.
+        reset(): Clears all stored state information.
+        ...
+    """
+
     def __init__(self, clients, state_file: str = "wolnut_state.json"):
         self._clients = clients
         self._state_file = state_file
