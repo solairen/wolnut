@@ -107,6 +107,6 @@ def validate_config(raw: dict):
         if not isinstance(mac, str):
             raise ValueError(
                 f"Client '{client['name']}' has invalid mac format (should be string or 'auto')")
-        if mac != "auto" and not _validate_mac_format(mac):
+        if mac != "auto" and not validate_mac_format(mac):
             raise ValueError(
                 f"Client '{client['name']}' has invalid MAC address format: {mac}")
