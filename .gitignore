@@ -6,3 +6,6 @@ __pycache__/
 state.json
 config.yaml
 vscode/
+
+# Magic packet test
+mp-test.py

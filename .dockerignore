@@ -20,3 +20,6 @@ __pycache__/
 # Ignore IDE/editor settings
 .vscode/
 .idea/
+
+# Magic packet test
+mp-test.py
