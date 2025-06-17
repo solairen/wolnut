@@ -1,8 +1,10 @@
 from dataclasses import dataclass, field
 import yaml
 import logging
+import os
+import sys
 
-from wolnut.utils import _validate_mac_format, resolve_mac_from_host
+from wolnut.utils import validate_mac_format, resolve_mac_from_host
 
 logger = logging.getLogger("wolnut")
 
@@ -38,12 +40,26 @@ class WolnutConfig:
     log_level: str = "INFO"
 
 
-def load_config(path: str = "config.yaml") -> WolnutConfig:
-    with open(path, "r") as f:
-        raw = yaml.safe_load(f)
+def load_config(path: str = None) -> WolnutConfig:
 
-    # validate
-    validate_config(raw)
+    if path is None:
+        # Prefer /config/config.yaml if it exists
+        default_path = "/config/config.yaml"
+        if os.path.exists(default_path):
+            path = default_path
+        else:
+            path = "config.yaml"
+
+    try:
+        with open(path, "r") as f:
+            raw = yaml.safe_load(f)
+        validate_config(raw)
+    except FileNotFoundError:
+        logger.error("Config file not found at '%s'.", path)
+        sys.exit(1)
+    except Exception as e:
+        logger.error("Failed to load or parse config file: %s", e)
+        sys.exit(1)
 
     # LOGGING...
     nut = NutConfig(**raw["nut"])
