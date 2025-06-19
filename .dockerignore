@@ -1,6 +1,9 @@
 # Ignore local config
 config.yaml
 
+# Ignore state file
+wolnut_state.json
+
 # Ignore dev/test configs
 *.local.yaml
 *.example.yaml
@@ -19,7 +22,5 @@ __pycache__/
 
 # Ignore IDE/editor settings
 .vscode/
+.vscode
 .idea/
-
-# Magic packet test
-mp-test.py
