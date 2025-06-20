@@ -17,9 +17,11 @@ def main():
 
     on_battery = False
     recorded_down_clients = set()
+    recorded_up_clients = set()
     battery_percent = 100
     restoration_event = False
     restoration_event_start = None
+    wol_being_sent = False
 
     state_tracker = ClientStateTracker(config.clients)
     if state_tracker.was_ups_on_battery():
@@ -74,8 +76,10 @@ def main():
                     int(config.wake_on.restore_delay_sec-(time.time() - restoration_event_start)))
 
             else:
-                logger.info("Power restored and battery >= %s%%. Preparing to send WOL...",
-                            config.wake_on.min_battery_percent)
+                if not wol_being_sent:
+                    logger.info("Power restored and battery >= %s%%. Preparing to send WOL...",
+                                config.wake_on.min_battery_percent)
+                    wol_being_sent = True
 
                 for client in config.clients:
 
@@ -89,8 +93,10 @@ def main():
                         continue
 
                     if state_tracker.is_online(client.name):
-                        logger.info("%s is online.", client.name)
-                        recorded_down_clients.discard(client.name)
+                        if client.name not in recorded_up_clients:
+                            logger.info("%s is online.", client.name)
+                            recorded_down_clients.discard(client.name)
+                            recorded_up_clients.update({client.name})
                         continue
 
                     else:
@@ -113,6 +119,7 @@ def main():
                     restoration_event = False
                     restoration_event_start = None
                     state_tracker.reset()
+                    wol_being_sent = False
                 else:
                     if time.time() - restoration_event_start > config.wake_on.client_timeout_sec:
                         logger.warning(
@@ -122,12 +129,15 @@ def main():
                                 "%s failed to come back online within timeout period.", client)
                         restoration_event = False
                         restoration_event_start = None
+                        wol_being_sent = False
                     else:
                         pass
 
         elif not on_battery and not restoration_event:
             state_tracker.reset()
             state_tracker.set_ups_on_battery(False)
+            recorded_down_clients.clear()
+            recorded_up_clients.clear()
 
         if not on_battery:
             time.sleep(config.poll_interval)
